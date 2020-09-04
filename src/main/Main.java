@@ -24,11 +24,21 @@ public class Main {
         String amount;
         do {
             System.out.println("Hansi mezenne :");
-            mezenne = br.readLine();
+            mezenne = br.readLine().toUpperCase();
             if (mezenne.equals("-1"))
                 break;
             System.out.println("Mebleg");
             amount = br.readLine();
+            boolean isChech = false;
+            for (int i = 0; i < amount.length(); i++) {
+                if (amount.charAt(i) >= '0' && amount.charAt(i) <= '9')
+                    isChech = true;
+            }
+            if (!isChech) {
+                System.out.println("Yanlis mebleg daxil etdiniz!");
+                break;
+
+            }
 
             BigDecimal amountCast = new BigDecimal(amount);
 
