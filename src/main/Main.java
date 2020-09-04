@@ -25,10 +25,14 @@ import java.util.Date;
 public class Main {
 
     public static void main(String[] args) throws ParserConfigurationException, IOException {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-        Date date = new Date();
-        String todaysDate=formatter.format(date);
-        URL url = new URL("https://www.cbar.az/currencies/"+todaysDate+".xml");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Tarix daxil et :");
+        String userDate = br.readLine();
+//        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+//        Date date = new Date();
+//        String todaysDate = formatter.format(date);
+
+        URL url = new URL("https://www.cbar.az/currencies/" + userDate + ".xml");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         int status = con.getResponseCode();
@@ -42,14 +46,12 @@ public class Main {
         con.disconnect();
 
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(System.getProperty("user.dir")+"/res/newData.xml")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(System.getProperty("user.dir") + "/res/newData.xml")));
         writer.write(content.toString());
 
         writer.close();
 
 
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String mezenne;
         String amount;
         do {
@@ -57,7 +59,7 @@ public class Main {
             mezenne = br.readLine().toUpperCase();
             if (mezenne.equals("-1"))
                 break;
-            System.out.println("Mebleg");
+            System.out.println("AZN Mebleg daxil edin :");
             amount = br.readLine();
             boolean isChech = false;
             for (int i = 0; i < amount.length(); i++) {
@@ -70,7 +72,7 @@ public class Main {
             }
             BigDecimal amountCast = new BigDecimal(amount);
             try {
-                File file=new File(System.getProperty("user.dir")+"/res/data.xml");
+                File file = new File(System.getProperty("user.dir") + "/res/newData.xml");
                 DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder();
                 Document doc = dBuilder.parse(file);
