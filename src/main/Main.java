@@ -1,5 +1,10 @@
 package main;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,11 +19,36 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Main {
 
     public static void main(String[] args) throws ParserConfigurationException, IOException {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        Date date = new Date();
+        String todaysDate=formatter.format(date);
+        URL url = new URL("https://www.cbar.az/currencies/"+todaysDate+".xml");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        int status = con.getResponseCode();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputline;
+        StringBuffer content = new StringBuffer();
+        while ((inputline = in.readLine()) != null) {
+            content.append(inputline);
+        }
+        in.close();
+        con.disconnect();
+
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(System.getProperty("user.dir")+"/res/newData.xml")));
+        writer.write(content.toString());
+
+        writer.close();
+
+
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String mezenne;
         String amount;
@@ -37,13 +67,10 @@ public class Main {
             if (!isChech) {
                 System.out.println("Yanlis mebleg daxil etdiniz!");
                 break;
-
             }
-
             BigDecimal amountCast = new BigDecimal(amount);
-
             try {
-                File file = new File("src/main/03.09.2020.xml");
+                File file=new File(System.getProperty("user.dir")+"/res/data.xml");
                 DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder();
                 Document doc = dBuilder.parse(file);
