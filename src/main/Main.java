@@ -25,10 +25,18 @@ import java.util.Date;
 public class Main {
 
     public static void main(String[] args) throws ParserConfigurationException, IOException {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-        Date date = new Date();
-        String todaysDate=formatter.format(date);
-        URL url = new URL("https://www.cbar.az/currencies/"+todaysDate+".xml");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Tarix daxil et :");
+        String userDate = br.readLine();
+        if (!userDate.matches("^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[13-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$")) {
+            System.out.println("Yanlis vaxt daxil etdiniz!");
+            return;
+        }
+//        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+//        Date date = new Date();
+//        String todaysDate = formatter.format(date);
+
+        URL url = new URL("https://www.cbar.az/currencies/" + userDate + ".xml");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         int status = con.getResponseCode();
@@ -42,14 +50,12 @@ public class Main {
         con.disconnect();
 
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(System.getProperty("user.dir")+"/res/newData.xml")));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(System.getProperty("user.dir") + "/res/newData.xml")));
         writer.write(content.toString());
 
         writer.close();
 
 
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String mezenne;
         String amount;
         do {
@@ -57,7 +63,7 @@ public class Main {
             mezenne = br.readLine().toUpperCase();
             if (mezenne.equals("-1"))
                 break;
-            System.out.println("Mebleg");
+            System.out.println("AZN Mebleg daxil edin :");
             amount = br.readLine();
             boolean isChech = false;
             for (int i = 0; i < amount.length(); i++) {
@@ -70,7 +76,7 @@ public class Main {
             }
             BigDecimal amountCast = new BigDecimal(amount);
             try {
-                File file=new File(System.getProperty("user.dir")+"/res/data.xml");
+                File file = new File(System.getProperty("user.dir") + "/res/newData.xml");
                 DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder();
                 Document doc = dBuilder.parse(file);
