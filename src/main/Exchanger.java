@@ -150,8 +150,7 @@ public class Exchanger {
             }
 
         } catch (Exception e) {
-            System.out.println("Daxil etdiyiniz tarixde fayl yoxdur.Endirmek isdeyirsizse 0-a basib Menu-ya qayidin.");
-
+            System.out.println("Daxil etdiyiniz tarixde fayl yoxdur.Fayli endirmek isdeyirsizse ve ya proqramdan cixmaq ucun 0-a basib Menu-ya qayidin.");
         }
         if (scanner.nextLine().equals("0")) {
             run();
