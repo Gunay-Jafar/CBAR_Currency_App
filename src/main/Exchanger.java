@@ -67,7 +67,7 @@ public class Exchanger {
         }
     }
 
-    private void readAndCalculateExchangeValue(String amount, String date, String mezenne) throws Exception {
+    private boolean readAndCalculateExchangeValue(String amount, String date, String mezenne) throws Exception {
         BigDecimal amountCast = new BigDecimal(amount);
         File file = new File(System.getProperty("user.dir") + "/res/" + date + ".xml");
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
@@ -91,6 +91,7 @@ public class Exchanger {
         if (!isFound) {
             System.out.println("Sehv mezenne daxil etdiniz!");
         }
+        return isFound;
     }
 
     void run() {
@@ -142,7 +143,6 @@ public class Exchanger {
                             System.out.println("Yanlis mebleg daxil etdiniz!");
                             continue;
                         }
-
                         readAndCalculateExchangeValue(amount, dateCur, mezenne);
 
                     }
@@ -150,10 +150,7 @@ public class Exchanger {
             }
 
         } catch (Exception e) {
-            System.out.println("Daxil etdiyiniz tarixde fayl yoxdur.Fayli endirmek isdeyirsizse ve ya proqramdan cixmaq ucun 0-a basib Menu-ya qayidin.");
-        }
-        if (scanner.nextLine().equals("0")) {
-            run();
+            System.out.println(e.getMessage());
         }
 
 
