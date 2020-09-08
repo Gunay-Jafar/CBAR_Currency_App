@@ -12,6 +12,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Exchanger {
@@ -56,6 +60,10 @@ public class Exchanger {
             writer.write(content.toString());
 
             writer.close();
+
+            System.out.println("Fayl ugurla endirildi.");
+        } else {
+            System.out.println("Fayl artiq movcuddur.");
         }
     }
 
@@ -86,34 +94,69 @@ public class Exchanger {
     }
 
     void run() {
+        Scanner scanner = new Scanner(System.in);
         try {
             while (true) {
                 if (askInputFromUser("Devam etmek ucun enter daxil et. Cixmaq ucun -1 daxil et").equals("-1"))
                     return;
 
-                String userDate = askInputFromUser("Tarix daxil et:");
-                boolean isDateValid = isDateValid(userDate);
-                if (!isDateValid)
+                System.out.println("****MENU****");
+                System.out.println("1.Fayli Endir");
+                System.out.println("2.Mezennenin daxil edilmesi");
+
+                if (scanner.nextLine().equals("1")) {
+                    String userDate = askInputFromUser("Tarix daxil et:");
+                    boolean isDateValid = isDateValid(userDate);
+                    if (!isDateValid)
+                        continue;
+                    StringBuilder content = getCurrencyDataWithDate(userDate);
+                    createAndFillFileIfNotExist(userDate, content);
                     continue;
 
-                StringBuilder content = getCurrencyDataWithDate(userDate);
-                createAndFillFileIfNotExist(userDate, content);
+                } else {
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+                    String dateCur = formatter.format(date);
+                    System.out.println(dateCur + " " + "gunluk tarixinin valyutasina baxmaq ucun 1 daxil edin,Tarix daxil etmek isdeyirsizse 2 daxil edin");
+                    if (scanner.nextLine().equals("2")) {
 
-                String mezenne = askInputFromUser("Mezenneni daxil edin:").toUpperCase();
-                String amount = askInputFromUser("AZN Mebleg daxil edin:");
+                        String userDate = askInputFromUser("Tarix daxil et:");
+                        boolean isDateValid = isDateValid(userDate);
+                        if (!isDateValid)
+                            continue;
+                        String mezenne = askInputFromUser("Mezenneni daxil edin:").toUpperCase();
+                        String amount = askInputFromUser("AZN Mebleg daxil edin:");
 
-                if (!amount.matches("^(0|[1-9]\\d*)(\\.\\d+)?$")) {
-                    System.out.println("Yanlis mebleg daxil etdiniz!");
-                    continue;
+                        if (!amount.matches("^(0|[1-9]\\d*)(\\.\\d+)?$")) {
+                            System.out.println("Yanlis mebleg daxil etdiniz!");
+                            continue;
+                        }
+
+                        readAndCalculateExchangeValue(amount, userDate, mezenne);
+
+                    } else {
+                        String mezenne = askInputFromUser("Mezenneni daxil edin:").toUpperCase();
+                        String amount = askInputFromUser("AZN Mebleg daxil edin:");
+
+                        if (!amount.matches("^(0|[1-9]\\d*)(\\.\\d+)?$")) {
+                            System.out.println("Yanlis mebleg daxil etdiniz!");
+                            continue;
+                        }
+
+                        readAndCalculateExchangeValue(amount, dateCur, mezenne);
+
+                    }
                 }
-
-                readAndCalculateExchangeValue(amount, userDate, mezenne);
-
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Daxil etdiyiniz tarixde fayl yoxdur.Endirmek isdeyirsizse 0-a basib Menu-ya qayidin.");
+
         }
+        if (scanner.nextLine().equals("0")) {
+            run();
+        }
+
 
     }
 }
