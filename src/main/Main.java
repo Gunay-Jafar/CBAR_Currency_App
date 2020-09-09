@@ -2,8 +2,8 @@ package main;
 
 public class Main {
     public static void main(String[] args) {
-
-        Exchanger exchanger = new Exchanger();
+        Exchanger exchanger=new Exchanger();
         exchanger.run();
+
     }
 }
