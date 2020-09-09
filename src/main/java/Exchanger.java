@@ -1,5 +1,3 @@
-package main;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -12,9 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -167,7 +163,5 @@ public class Exchanger {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-
     }
 }
