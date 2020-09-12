@@ -4,6 +4,11 @@ import javax.persistence.*;
 
 @Entity
 @Table(schema = "public",name = "cbar_content")
+@NamedQueries({
+        @NamedQuery(name = "Cbar.findAll", query = "select c from Cbar_content c"),
+        @NamedQuery(name = "Cbar.findByCode", query = "select c from Cbar_content c where " +
+                "c.code=:code")
+})
 public class Cbar_content {
 
     @Id

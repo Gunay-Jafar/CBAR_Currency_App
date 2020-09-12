@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -13,22 +14,26 @@ public class Cbar_date {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "date", unique = true)
+    private LocalDate date;
 
     public Cbar_date() {
 
     }
 
-    public Date getDate() {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public Cbar_date(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

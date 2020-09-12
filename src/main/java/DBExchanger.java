@@ -1,20 +1,35 @@
+import entity.Cbar_content;
+import entity.Cbar_date;
+import org.hibernate.Session;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.persistence.NoResultException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Scanner;
 
-public class Exchanger {
+/** @noinspection Duplicates*/
+public class DBExchanger {
+
+    private Session ses;
+
+    public DBExchanger() {
+        ses = HibernateUtil.getSessionFactory().openSession();
+    }
 
     private boolean isDateValid(String userDate) {
         if (!userDate.matches("^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[13-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$")) {
@@ -99,8 +114,11 @@ public class Exchanger {
         StoreDB storeDB=new StoreDB();
         try {
             while (true) {
-                if (askInputFromUser("Devam etmek ucun enter daxil et. Cixmaq ucun -1 daxil et").equals("-1"))
+                if (askInputFromUser("Devam etmek ucun enter daxil et. Cixmaq ucun -1 daxil et").equals("-1")) {
+                    ses.close();
+                    HibernateUtil.shutdown();
                     return;
+                }
 
                 System.out.println("****MENU****");
                 System.out.println("1.Fayli Endir");
@@ -112,11 +130,12 @@ public class Exchanger {
                     if (!isDateValid)
                         continue;
 
-                    StringBuilder content = getCurrencyDataWithDate(userDate);
-                    createAndFillFileIfNotExist(userDate, content);
-                    storeDB.insertRow(userDate,content);
-
-                    continue;
+                    if(notExists(userDate)) {
+                        fillDatabase(userDate);
+                        continue;
+                    }else{
+                        System.out.println(userDate+" məlumatları mövcuddur");
+                    }
 
                 } else {
                     Date date = new Date();
@@ -166,6 +185,56 @@ public class Exchanger {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    private void fillDatabase(String userDate) {
+        try{
+            ses.beginTransaction();
+
+            Cbar_date cd = new Cbar_date();
+            cd.setDate(LocalDate.parse(userDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            ses.save(cd);
+
+            URL url = new URL("https://www.cbar.az/currencies/" + userDate + ".xml");
+            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = dBuilder.parse(url.toURI().toString());
+            doc.getDocumentElement().normalize();
+            NodeList nl = doc.getElementsByTagName("ValType").item(0).getChildNodes();
+
+            for (int i = 0, len=nl.getLength();i < len; i++) {
+                Node tempNode = nl.item(i);
+                if (tempNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) tempNode;
+                    Cbar_content cc = new Cbar_content();
+                    cc.setValue(eElement.getElementsByTagName("Value").item(0).getTextContent());
+                    cc.setNominal(eElement.getElementsByTagName("Nominal").item(0).getTextContent());
+                    cc.setName(eElement.getElementsByTagName("Name").item(0).getTextContent());
+                    cc.setCode(eElement.getAttribute("Code"));
+                    cc.setCbar_date(cd);
+                    ses.save(cc);
+                    System.out.println(cc.getCode()+" yaddasa verildi");
+                }
+            }
+
+            ses.getTransaction().commit();
+            System.out.println(userDate+" fayl ugurla bazaya yazildi");
+        }catch (Exception ex){
+            ex.printStackTrace();
+            ses.getTransaction().rollback();
+            System.out.println("xeta bas verdi");
+        }
+    }
+
+    private boolean notExists(String userDate) {
+        try {
+            LocalDate ld = LocalDate.parse(userDate, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            Object res = ses.createQuery("select true from Cbar_date where date=:date")
+                    .setParameter("date", ld).getSingleResult();
+            return res==null|| res.toString().equals("false");
+        }catch (NoResultException ex){
+            System.out.println(ex.getMessage());
+            return true;
         }
     }
 }
